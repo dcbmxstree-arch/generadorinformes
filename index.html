@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Informes LaTeX – MULTIESTUDIOS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔬 MULTIESTUDIOS</h1>
+            <p>Generador de Informes para Especialistas en Ingeniería</p>
+        </header>
+
+        <div class="form-group">
+            <label>👤 Nombre completo del Ingeniero que emite el informe</label>
+            <input type="text" id="nombre" placeholder="Ej: Juan Pérez" required>
+        </div>
+
+        <div class="form-group">
+            <label>🎓 Carrera de especialización</label>
+            <select id="carrera">
+                <option value="">-- Seleccione --</option>
+                <option>Ingeniería Mecánica</option>
+                <option>Ingeniería Informática</option>
+                <option>Ingeniería Civil</option>
+                <option>Arquitectura</option>
+                <option>Ingeniería Industrial</option>
+                <option>Administración de Empresas</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>📄 Caso práctico (pegue aquí el texto completo)</label>
+            <textarea id="caso" rows="10" placeholder="Pegue el contexto operacional y las preguntas..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>✅ Respuesta del caso (pegue aquí la respuesta oficial)</label>
+            <textarea id="respuesta" rows="10" placeholder="Pegue la respuesta estructurada..."></textarea>
+        </div>
+
+        <button id="generar">🚀 Generar Informe LaTeX</button>
+
+        <div id="resultado" style="display:none;">
+            <h2>Código LaTeX generado</h2>
+            <textarea id="codigo-latex" rows="20" readonly></textarea>
+            <button id="copiar">📋 Copiar al portapapeles</button>
+        </div>
+        <div id="error" style="display:none; color:red;"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
