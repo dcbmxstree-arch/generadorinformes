@@ -3,15 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Informes LaTeX – MULTIESTUDIOS</title>
-    <link rel="stylesheet" href="style.css">
+    <title>MULTIESTUDIOS – Generador de Informes LaTeX</title>
+    <style>
+        :root {
+            --color-primario: #0b3b6b;
+            --color-secundario: #f4f7fc;
+            --color-blanco: #ffffff;
+            --color-error: #c0392b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--color-secundario);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--color-blanco);
+            max-width: 1000px;
+            width: 100%;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: var(--color-primario);
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .btn {
+            background: var(--color-primario);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #084a7a;
+        }
+
+        .btn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+
+        #resultado {
+            margin-top: 30px;
+            display: none;
+        }
+
+        #codigo-latex {
+            width: 100%;
+            height: 400px;
+            font-family: 'Courier New', monospace;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 6px;
+            resize: vertical;
+        }
+
+        .error {
+            color: var(--color-error);
+            margin-top: 20px;
+            display: none;
+        }
+
+        .advertencia {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+            color: #856404;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>🔬 MULTIESTUDIOS</h1>
-            <p>Generador de Informes para Especialistas en Ingeniería</p>
+            <p>Generador de Informes LaTeX para Especialistas en Ingeniería</p>
         </header>
+
+        <div class="advertencia">
+            ⚠️ <strong>Versión de pruebas:</strong> La API Key se encuentra en el código. No usar en producción.
+        </div>
 
         <div class="form-group">
             <label>👤 Nombre completo del Ingeniero que emite el informe</label>
@@ -20,7 +151,7 @@
 
         <div class="form-group">
             <label>🎓 Carrera de especialización</label>
-            <select id="carrera">
+            <select id="carrera" required>
                 <option value="">-- Seleccione --</option>
                 <option>Ingeniería Mecánica</option>
                 <option>Ingeniería Informática</option>
@@ -33,24 +164,146 @@
 
         <div class="form-group">
             <label>📄 Caso práctico (pegue aquí el texto completo)</label>
-            <textarea id="caso" rows="10" placeholder="Pegue el contexto operacional y las preguntas..."></textarea>
+            <textarea id="caso" placeholder="Pegue el contexto operacional y las preguntas..."></textarea>
         </div>
 
         <div class="form-group">
             <label>✅ Respuesta del caso (pegue aquí la respuesta oficial)</label>
-            <textarea id="respuesta" rows="10" placeholder="Pegue la respuesta estructurada..."></textarea>
+            <textarea id="respuesta" placeholder="Pegue la respuesta estructurada..."></textarea>
         </div>
 
-        <button id="generar">🚀 Generar Informe LaTeX</button>
+        <button id="generar" class="btn">🚀 Generar Informe LaTeX</button>
 
-        <div id="resultado" style="display:none;">
-            <h2>Código LaTeX generado</h2>
-            <textarea id="codigo-latex" rows="20" readonly></textarea>
-            <button id="copiar">📋 Copiar al portapapeles</button>
+        <div id="error" class="error"></div>
+
+        <div id="resultado">
+            <h2 style="margin-bottom:15px;">Código LaTeX generado</h2>
+            <textarea id="codigo-latex" readonly></textarea>
+            <button id="copiar" class="btn" style="margin-top:10px;">📋 Copiar al portapapeles</button>
         </div>
-        <div id="error" style="display:none; color:red;"></div>
     </div>
 
-    <script src="app.js"></script>
+    <script>
+        // ================= CONFIGURACIÓN =================
+        const DEEPSEEK_API_KEY = 'sk-044520a24cfe4709b946c01cf2a3dcf6'; // ⚠️ SOLO PARA PRUEBAS
+        const API_URL = 'https://api.deepseek.com/chat/completions';
+        // =================================================
+
+        document.getElementById('generar').addEventListener('click', async () => {
+            const nombre = document.getElementById('nombre').value.trim();
+            const carrera = document.getElementById('carrera').value;
+            const caso = document.getElementById('caso').value.trim();
+            const respuesta = document.getElementById('respuesta').value.trim();
+
+            // Validación
+            if (!nombre || !carrera || !caso || !respuesta) {
+                mostrarError('Todos los campos son obligatorios.');
+                return;
+            }
+
+            const btn = document.getElementById('generar');
+            btn.disabled = true;
+            btn.textContent = 'Generando...';
+            ocultarError();
+            ocultarResultado();
+
+            try {
+                const systemPrompt = construirSystemPrompt(nombre, carrera);
+                const userMessage = `Caso práctico:\n${caso}\n\nRespuesta:\n${respuesta}`;
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'deepseek-chat',
+                        messages: [
+                            { role: 'system', content: systemPrompt },
+                            { role: 'user', content: userMessage }
+                        ],
+                        temperature: 0.1,
+                        max_tokens: 8000
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error?.message || `Error HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (!data.choices || data.choices.length === 0) {
+                    throw new Error('La API no devolvió contenido.');
+                }
+
+                const latexCode = data.choices[0].message.content;
+                document.getElementById('codigo-latex').value = latexCode;
+                document.getElementById('resultado').style.display = 'block';
+
+            } catch (err) {
+                mostrarError('Error: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🚀 Generar Informe LaTeX';
+            }
+        });
+
+        document.getElementById('copiar').addEventListener('click', () => {
+            const codigo = document.getElementById('codigo-latex');
+            codigo.select();
+            document.execCommand('copy');
+            alert('Código LaTeX copiado al portapapeles.');
+        });
+
+        function construirSystemPrompt(nombre, carrera) {
+            return `Eres un experto en redacción técnica y LaTeX para la institución policial MULTIESTUDIOS.
+Tu tarea es generar el código LaTeX COMPLETO de un informe de caso práctico para un aspirante a especialista.
+
+REGLAS OBLIGATORIAS:
+1. NO INVENTES NINGUNA LEY, NORMA, ARTÍCULO O REFERENCIA TÉCNICA INEXISTENTE.
+   - Solo puedes mencionar normativas si aparecen explícitamente en el caso o respuesta proporcionados.
+   - Si el caso/respuesta menciona "LOSNCP", puedes referirte a sus principios generales (eficiencia, transparencia) pero NUNCA cites artículos concretos.
+   - Si el texto original dice "según la normativa INEN 2 266 (verificar versión actual)", puedes incluir esa cita textual, pero NO agregues números de normas adicionales.
+   - Si no hay normativa explícita, usa frases genéricas como "la normativa técnica aplicable", "los reglamentos institucionales".
+
+2. El documento debe ser compilable sin errores en Overleaf.
+
+3. ESTRUCTURA OBLIGATORIA DEL DOCUMENTO:
+   - Portada profesional con: "MULTIESTUDIOS", "Centro de Educación Continua", la carrera "${carrera}", "Informe de Caso Práctico".
+   - En la portada y en el pie de página debe figurar: "Ingeniero ${nombre}".
+   - Sección 1: Caso Práctico (texto completo del caso proporcionado).
+   - Sección 2: Mapa de Conocimientos Relacionados (lista de áreas de ingeniería y doctrina policial que aplican, SIN inventar normas).
+   - Sección 3: Enlace de las Ideas y Campos (cómo se conectan los síntomas con las áreas listadas).
+   - Sección 4: Respuestas Estructuradas (las respuestas oficiales al caso).
+   - Sección 5: Conclusiones y Recomendaciones.
+
+4. FORMATO DEL CÓDIGO:
+   - Comienza con \\\\documentclass[12pt,a4paper]{article} y termina con \\\\end{document}.
+   - NO escribas ningún texto antes ni después del código LaTeX.
+   - Paquetes recomendados: inputenc (utf8), fontenc (T1), babel (spanish,es-tabla), geometry, fancyhdr, enumitem, parskip, hyperref, booktabs.
+   - El pie de página debe incluir "MULTIESTUDIOS – Curso de Especialización" a la izquierda y "Ingeniero ${nombre}" a la derecha.
+   - Usa formato profesional, con márgenes de 2.5 cm.
+
+5. NO uses imágenes. Solo texto.
+
+A continuación se te proporcionan el caso práctico y su respuesta.`;
+        }
+
+        function mostrarError(msg) {
+            const errDiv = document.getElementById('error');
+            errDiv.textContent = msg;
+            errDiv.style.display = 'block';
+        }
+
+        function ocultarError() {
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function ocultarResultado() {
+            document.getElementById('resultado').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
