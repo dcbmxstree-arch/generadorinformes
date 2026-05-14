@@ -141,7 +141,7 @@
         </header>
 
         <div class="advertencia">
-            ⚠️ <strong>Versión de pruebas:</strong> La API Key se encuentra en el código. No usar en producción.
+            ⚠️ <strong>Versión de pruebas:</strong> versión de pruebas.
         </div>
 
         <div class="form-group">
@@ -258,8 +258,8 @@
         });
 
         function construirSystemPrompt(nombre, carrera) {
-            return `Eres un experto en redacción técnica y LaTeX para la institución policial MULTIESTUDIOS.
-Tu tarea es generar el código LaTeX COMPLETO de un informe de caso práctico para un aspirante a especialista.
+    return `Eres un experto en redacción técnica y LaTeX para la institución policial MULTIESTUDIOS.
+Tu tarea es generar el código LaTeX COMPLETO de un informe de caso práctico para un aspirante a especialista en ${carrera}.
 
 REGLAS OBLIGATORIAS:
 1. NO INVENTES NINGUNA LEY, NORMA, ARTÍCULO O REFERENCIA TÉCNICA INEXISTENTE.
@@ -274,13 +274,28 @@ REGLAS OBLIGATORIAS:
    - Portada profesional con: "MULTIESTUDIOS", "Centro de Educación Continua", la carrera "${carrera}", "Informe de Caso Práctico".
    - En la portada y en el pie de página debe figurar: "Ingeniero ${nombre}".
    - Sección 1: Caso Práctico (texto completo del caso proporcionado).
-   - Sección 2: Mapa de Conocimientos Relacionados (lista de áreas de ingeniería y doctrina policial que aplican, SIN inventar normas).
-   - Sección 3: Enlace de las Ideas y Campos (cómo se conectan los síntomas con las áreas listadas).
-   - Sección 4: Respuestas Estructuradas (las respuestas oficiales al caso).
-   - Sección 5: Conclusiones y Recomendaciones.
+   - Sección 2: Mapa de Conocimientos Relacionados.
+        **IMPORTANTE: Esta sección debe limitarse ESTRICTAMENTE a los campos propios de ${carrera}.**
+        NO incluyas conocimientos de otras ingenierías (ej: si es Mecánica, no pongas "ingeniería eléctrica" o "civil").
+        Debes listar entre 4 y 7 campos típicos de ${carrera}, y para cada campo escribir una lista con conceptos específicos que puedan aplicarse al caso.
+        Además, incluye siempre los sub-apartados: "Doctrina Policial Aplicable" y "Normativa Técnica Relevante" (solo si aparece explícita en el caso/respuesta; si no, usa frases genéricas).
+        Ejemplo (para Ingeniería Mecánica en un caso de armas):
+            - Ciencia de Materiales: propiedades mecánicas, fatiga, dureza, tratamientos térmicos.
+            - Mecánica de Materiales: esfuerzos, deformaciones, fallo por fractura.
+            - Mecánica de Fluidos: flujo interno, pérdidas de carga, cavitación.
+            - Ensayos No Destructivos: ultrasonidos, partículas magnéticas, tintas penetrantes.
+            - Doctrina Policial: cadena de custodia, protocolos de seguridad.
+            - Normativa Técnica: referencias generales sin inventar números.
+   - Sección 3: Enlace de las Ideas y Campos.
+        Explica cómo se conectan los síntomas del caso con los campos del mapa anterior.
+        **Debes mencionar explícitamente los conceptos listados en el Mapa de Conocimientos** que resultan necesarios para abordar el problema.
+        Muestra la relación lógica: "El síntoma X se analiza mediante el concepto Y del campo Z, lo que permite llegar a la respuesta W".
+        No introduzcas campos fuera de ${carrera}.
+   - Sección 4: Respuestas Estructuradas (las respuestas oficiales al caso, organizadas en subsecciones).
+   - Sección 5: Conclusiones y Recomendaciones (basadas únicamente en la respuesta y el enlace de ideas).
 
 4. FORMATO DEL CÓDIGO:
-   - Comienza con \\\\documentclass[12pt,a4paper]{article} y termina con \\\\end{document}.
+   - Comienza con \\documentclass[12pt,a4paper]{article} y termina con \\end{document}.
    - NO escribas ningún texto antes ni después del código LaTeX.
    - Paquetes recomendados: inputenc (utf8), fontenc (T1), babel (spanish,es-tabla), geometry, fancyhdr, enumitem, parskip, hyperref, booktabs.
    - El pie de página debe incluir "MULTIESTUDIOS – Curso de Especialización" a la izquierda y "Ingeniero ${nombre}" a la derecha.
@@ -289,7 +304,7 @@ REGLAS OBLIGATORIAS:
 5. NO uses imágenes. Solo texto.
 
 A continuación se te proporcionan el caso práctico y su respuesta.`;
-        }
+}
 
         function mostrarError(msg) {
             const errDiv = document.getElementById('error');
